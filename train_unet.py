@@ -15,15 +15,22 @@ def normalize(img):
     x = 2.0 * (img - min) / (max - min) - 1.0
     return x
 
+def take_4bands(img):
+    # print('The shape of original image is', img.shape)
+    # newimage = np.stack([img[:,:,0], img[:,:,1], img[:,:,2], img[:,:,3]], axis=-1)
+    newimage = img[:,:,0:4]
+    # print('The shape of new image is', newimage.shape) 
+    return newimage
 
 
-N_BANDS = 8
+
+N_BANDS = 4 
 N_CLASSES = 5  # buildings, roads, trees, crops and water
 CLASS_WEIGHTS = [0.2, 0.3, 0.1, 0.1, 0.3]
-N_EPOCHS = 150
+N_EPOCHS = 100 #150 #150 is original value
 UPCONV = True
-PATCH_SZ = 160   # should divide by 16
-BATCH_SIZE = 150
+PATCH_SZ = 160   # was originally 160 # should divide by 16
+BATCH_SIZE = 50  #150 #150 is original value #runs well on 20 but.. 
 TRAIN_SZ = 4000  # train size
 VAL_SZ = 1000    # validation size
 
@@ -48,7 +55,7 @@ if __name__ == '__main__':
 
     print('Reading images')
     for img_id in trainIds:
-        img_m = normalize(tiff.imread('./data/mband/{}.tif'.format(img_id)).transpose([1, 2, 0]))
+        img_m = take_4bands(normalize(tiff.imread('./data/mband/{}.tif'.format(img_id)).transpose([1, 2, 0])))
         mask = tiff.imread('./data/gt_mband/{}.tif'.format(img_id)).transpose([1, 2, 0]) / 255
         train_xsz = int(3/4 * img_m.shape[0])  # use 75% of image as train and 25% for validation
         X_DICT_TRAIN[img_id] = img_m[:train_xsz, :, :]
