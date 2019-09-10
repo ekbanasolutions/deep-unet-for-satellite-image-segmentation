@@ -57,12 +57,14 @@ def picture_from_mask(mask, threshold=0):
         3: [166, 219, 160],  # Crops
         4: [116, 173, 209]   # Water
     }
+
+    # original z-order = 3,4,0,1,2
     z_order = {
         1: 3,
-        2: 4,
-        3: 0,
-        4: 1,
-        5: 2
+        2: 2,
+        3: 4,
+        4: 0,
+        5: 1 
     }
     pict = 255*np.ones(shape=(3, mask.shape[1], mask.shape[2]), dtype=np.uint8)
     for i in range(1, 6):
@@ -154,10 +156,10 @@ if __name__ == '__main__':
                 mymat = np.mean( np.array([ temp, mymat ]), axis=0 )
 
         #print(mymat[class_id][0][0], mymat[3][12][13])
-        map = picture_from_mask(mymat, 0.5)
+        map = picture_from_mask(mymat, 0.3)
         #mask = predict(img, model, patch_sz=PATCH_SZ, n_classes=N_CLASSES).transpose([2,0,1])  # make channels first
         #map = picture_from_mask(mask, 0.5)
 
         #tiff.imsave('result.tif', (255*mask).astype('uint8'))
-        tiff.imsave(test_file + str(a) + str(b) + str(c) + str(d) + '_result.tif', (255*mymat).astype('uint8'))
-        tiff.imsave(test_file + str(a) + str(b) + str(c) + str(d) + '_map.tif', map)
+        tiff.imsave(test_file + '_result.tif', (255*mymat).astype('uint8'))
+        tiff.imsave(test_file + '_map.tif', map)
