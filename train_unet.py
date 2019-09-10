@@ -33,13 +33,13 @@ CLASS_WEIGHTS = [0.2, 0.3, 0.2, 0.1, 0.2] #w9.hdf5
 CLASS_WEIGHTS = [0.2, 0.2, 0.2, 0.2, 0.2] #w10.hdf5
 CLASS_WEIGHTS = [0.3, 0.2, 0.3, 0.1, 0.1] #w11.hdf5
 CLASS_WEIGHTS = [0.3, 0.2, 0.2, 0.1, 0.2] #w12.hdf5
+CLASS_WEIGHTS = [0.2, 0.3, 0.1, 0.1, 0.3] #w13
 
-PATCH_SZ = 320  # was originally 160 # should divide by 16
+PATCH_SZ = 160  # was originally 160 # should divide by 16
 BATCH_SIZE = 120  #150 #150 is original value #runs well on 20 but.. 
-TRAIN_SZ = 8000  # train size
-VAL_SZ = 4000    # validation size
-
 UPCONV = True
+TRAIN_SZ = 4000  # train size
+VAL_SZ = 1000
 
 def get_model():
     return unet_model(N_CLASSES, PATCH_SZ, n_channels=N_BANDS, upconv=UPCONV, class_weights=CLASS_WEIGHTS)
@@ -47,7 +47,7 @@ def get_model():
 weights_path = 'weights'
 if not os.path.exists(weights_path):
     os.makedirs(weights_path)
-weights_path += '/w12.hdf5'
+weights_path += '/w13.hdf5'
 
 trainIds = [str(i).zfill(2) for i in range(1, 25)]  # all availiable ids: from "01" to "24"
 
