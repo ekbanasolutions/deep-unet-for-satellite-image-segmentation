@@ -8,7 +8,7 @@ from keras.callbacks import CSVLogger
 from keras.callbacks import TensorBoard
 from keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
 
-band_r, band_g, band_b, band_n = 4, 2, 1, 6 # could be 4, 2, 1, 6 or 4, 2, 1, 7
+band_r, band_g, band_b, band_n = 4, 2, 1, 7 # could be 4, 2, 1, 6 or 4, 2, 1, 7
 def normalize(img):
     min = img.min()
     max = img.max()
@@ -34,9 +34,10 @@ CLASS_WEIGHTS = [0.2, 0.2, 0.2, 0.2, 0.2] #w10.hdf5
 CLASS_WEIGHTS = [0.3, 0.2, 0.3, 0.1, 0.1] #w11.hdf5
 CLASS_WEIGHTS = [0.3, 0.2, 0.2, 0.1, 0.2] #w12.hdf5
 CLASS_WEIGHTS = [0.2, 0.3, 0.1, 0.1, 0.3] #w13
+CLASS_WEIGHTS = [0.2, 0.3, 0.1, 0.1, 0.3] #w14
 
 PATCH_SZ = 160  # was originally 160 # should divide by 16
-BATCH_SIZE = 120  #150 #150 is original value #runs well on 20 but.. 
+BATCH_SIZE = 15  #150 #150 is original value #runs well on 20 but.. 
 UPCONV = True
 TRAIN_SZ = 4000  # train size
 VAL_SZ = 1000
@@ -47,7 +48,7 @@ def get_model():
 weights_path = 'weights'
 if not os.path.exists(weights_path):
     os.makedirs(weights_path)
-weights_path += '/w13.hdf5'
+weights_path += '/w14.hdf5'
 
 trainIds = [str(i).zfill(2) for i in range(1, 25)]  # all availiable ids: from "01" to "24"
 
