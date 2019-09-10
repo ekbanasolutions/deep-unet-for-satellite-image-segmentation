@@ -37,7 +37,7 @@ CLASS_WEIGHTS = [0.2, 0.3, 0.1, 0.1, 0.3] #w13
 CLASS_WEIGHTS = [0.2, 0.3, 0.1, 0.1, 0.3] #w14
 
 PATCH_SZ = 160  # was originally 160 # should divide by 16
-BATCH_SIZE = 15  #150 #150 is original value #runs well on 20 but.. 
+BATCH_SIZE = 2  #150 #150 is original value #runs well on 20 but.. 
 UPCONV = True
 TRAIN_SZ = 4000  # train size
 VAL_SZ = 1000
@@ -48,7 +48,7 @@ def get_model():
 weights_path = 'weights'
 if not os.path.exists(weights_path):
     os.makedirs(weights_path)
-weights_path += '/w14.hdf5'
+weights_path += '/w15.hdf5'
 
 trainIds = [str(i).zfill(2) for i in range(1, 25)]  # all availiable ids: from "01" to "24"
 
