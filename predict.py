@@ -1,9 +1,14 @@
+import os
+os.environ["CUDA_VISIBLE_DEVICES"]="1" # second gpu
+
 import math
 import numpy as np
 import matplotlib.pyplot as plt
 import tifffile as tiff
+from os import sys
+import itertools
 
-from train_unet import weights_path, get_model, normalize, PATCH_SZ, N_CLASSES
+from train_unet import weights_path, get_model, normalize, PATCH_SZ, N_CLASSES 
 
 
 def predict(x, model, patch_sz=160, n_classes=5):
@@ -67,53 +72,92 @@ def picture_from_mask(mask, threshold=0):
     return pict
 
 
+def get_4bands(img):
+   
+     '''returns 4 band in the order RGBN'''
+ 
+     # print('The shape of original image is', img.shape)
+     if (img.shape[2] == 8):
+         newimage = np.stack([img[:,:,4], img[:,:,2], img[:,:,1], img[:,:,7]], axis=-1)
+         print ("8 band file given for inference, reading only 4 bands with index 4, 2, 1, 7")
+     elif (img.shape[2] == 4):
+         newimage = np.stack([img[:,:,0], img[:,:,1], img[:,:,2], img[:,:,3]], axis=-1)
+         print ("4 band file given for inference, reading rgbn in the index order 0123")
+     # newimage = np.stack([img[:,:,3], img[:,:,1], img[:,:,0], img[:,:,2]], axis=-1)
+     # newimage = img[:,:,0:4]
+     
+     # print('The shape of new image is', newimage.shape) 
+     return newimage
+
 if __name__ == '__main__':
     model = get_model()
+    if len(sys.argv) == 3:
+        weights_path = sys.argv[2]
     model.load_weights(weights_path)
-    test_id = 'test'
-    img = normalize(tiff.imread('data/mband/{}.tif'.format(test_id)).transpose([1,2,0]))   # make channels last
+    if len(sys.argv)<2:
+        print("Enter file path")
+    test_file = sys.argv[1]
+    test_id = sys.argv[1]
+    #test_id = '23'
+    class_id = 4 
+    # img = take_4bands(normalize(tiff.imread('data/mband/{}.tif'.format(test_id)).transpose([1,2,0])))   # make channels last
+    img = tiff.imread(test_file).transpose([1,2,0])
+    print (img)
+    img = get_4bands(normalize(tiff.imread(test_file).transpose([1,2,0])))   # make channels last
+    band_list = [0, 1, 2, 3] # to permute all the bands
+    perm_list = list(itertools.permutations(band_list))
+    for a, b, c, d in perm_list[0:1]:
+        img = np.stack([img[:,:,a], img[:,:,b], img[:,:,c], img[:,:,d]], axis=-1) 
+        # img = normalize(tiff.imread('data/mband/{}.tif'.format(test_id)).transpose([1,2,0]))   # make channels last
+        print ("The shape of image for prediction is: ", img.shape)
+        res_shape = tuple([8]+list(img.shape[0:2])+[N_CLASSES]) # [8] here comes from the 8 augmented images
+        results = np.zeros(shape=res_shape)
+        print ("Results Shape = ", results.shape)
+        for i in range(8):
+            if i == 0:  # reverse first dimension
+                mymat = predict(img[::-1,:,:], model, patch_sz=PATCH_SZ, n_classes=N_CLASSES).transpose([2,0,1])
+                print(mymat[class_id][0][0], mymat[3][12][13])
+                print("Case 1",img.shape, mymat.shape)
+            elif i == 1:    # reverse second dimension
+                temp = predict(img[:,::-1,:], model, patch_sz=PATCH_SZ, n_classes=N_CLASSES).transpose([2,0,1])
+                print(temp[class_id][0][0], temp[3][12][13])
+                print("Case 2", temp.shape, mymat.shape)
+                mymat = np.mean( np.array([ temp[:,::-1,:], mymat ]), axis=0 )
+            elif i == 2:    # transpose(interchange) first and second dimensions
+                temp = predict(img.transpose([1,0,2]), model, patch_sz=PATCH_SZ, n_classes=N_CLASSES).transpose([2,0,1])
+                print(temp[class_id][0][0], temp[3][12][13])
+                print("Case 3", temp.shape, mymat.shape)
+                mymat = np.mean( np.array([ temp.transpose(0,2,1), mymat ]), axis=0 )
+            elif i == 3:
+                temp = predict(np.rot90(img, 1), model, patch_sz=PATCH_SZ, n_classes=N_CLASSES)
+                print(temp.transpose([2,0,1])[class_id][0][0], temp.transpose([2,0,1])[3][12][13])
+                print("Case 4", temp.shape, mymat.shape)
+                mymat = np.mean( np.array([ np.rot90(temp, -1).transpose([2,0,1]), mymat ]), axis=0 )
+            elif i == 4:
+                temp = predict(np.rot90(img,2), model, patch_sz=PATCH_SZ, n_classes=N_CLASSES)
+                print(temp.transpose([2,0,1])[class_id][0][0], temp.transpose([2,0,1])[3][12][13])
+                print("Case 5", temp.shape, mymat.shape)
+                mymat = np.mean( np.array([ np.rot90(temp,-2).transpose([2,0,1]), mymat ]), axis=0 )
+            elif i == 5:
+                temp = predict(np.rot90(img,3), model, patch_sz=PATCH_SZ, n_classes=N_CLASSES)
+                print(temp.transpose([2,0,1])[class_id][0][0], temp.transpose([2,0,1])[3][12][13])
+                print("Case 6", temp.shape, mymat.shape)
+                mymat = np.mean( np.array([ np.rot90(temp, -3).transpose(2,0,1), mymat ]), axis=0 )
+            elif i ==6:
+                #added by me 
+                temp = predict(img, model, patch_sz=PATCH_SZ, n_classes=N_CLASSES).transpose([2,0,1])
+                print ("Case 7", temp.shape, mymat.shape)
+            else:
+                temp = predict(img, model, patch_sz=PATCH_SZ, n_classes=N_CLASSES).transpose([2,0,1])
+                print(temp[class_id][0][0], temp[3][12][13])
+                print("Case 8", temp.shape, mymat.shape)
+                mymat = np.mean( np.array([ temp, mymat ]), axis=0 )
 
-    for i in range(7):
-        if i == 0:  # reverse first dimension
-            mymat = predict(img[::-1,:,:], model, patch_sz=PATCH_SZ, n_classes=N_CLASSES).transpose([2,0,1])
-            #print(mymat[0][0][0], mymat[3][12][13])
-            print("Case 1",img.shape, mymat.shape)
-        elif i == 1:    # reverse second dimension
-            temp = predict(img[:,::-1,:], model, patch_sz=PATCH_SZ, n_classes=N_CLASSES).transpose([2,0,1])
-            #print(temp[0][0][0], temp[3][12][13])
-            print("Case 2", temp.shape, mymat.shape)
-            mymat = np.mean( np.array([ temp[:,::-1,:], mymat ]), axis=0 )
-        elif i == 2:    # transpose(interchange) first and second dimensions
-            temp = predict(img.transpose([1,0,2]), model, patch_sz=PATCH_SZ, n_classes=N_CLASSES).transpose([2,0,1])
-            #print(temp[0][0][0], temp[3][12][13])
-            print("Case 3", temp.shape, mymat.shape)
-            mymat = np.mean( np.array([ temp.transpose(0,2,1), mymat ]), axis=0 )
-        elif i == 3:
-            temp = predict(np.rot90(img, 1), model, patch_sz=PATCH_SZ, n_classes=N_CLASSES)
-            #print(temp.transpose([2,0,1])[0][0][0], temp.transpose([2,0,1])[3][12][13])
-            print("Case 4", temp.shape, mymat.shape)
-            mymat = np.mean( np.array([ np.rot90(temp, -1).transpose([2,0,1]), mymat ]), axis=0 )
-        elif i == 4:
-            temp = predict(np.rot90(img,2), model, patch_sz=PATCH_SZ, n_classes=N_CLASSES)
-            #print(temp.transpose([2,0,1])[0][0][0], temp.transpose([2,0,1])[3][12][13])
-            print("Case 5", temp.shape, mymat.shape)
-            mymat = np.mean( np.array([ np.rot90(temp,-2).transpose([2,0,1]), mymat ]), axis=0 )
-        elif i == 5:
-            temp = predict(np.rot90(img,3), model, patch_sz=PATCH_SZ, n_classes=N_CLASSES)
-            #print(temp.transpose([2,0,1])[0][0][0], temp.transpose([2,0,1])[3][12][13])
-            print("Case 6", temp.shape, mymat.shape)
-            mymat = np.mean( np.array([ np.rot90(temp, -3).transpose(2,0,1), mymat ]), axis=0 )
-        else:
-            temp = predict(img, model, patch_sz=PATCH_SZ, n_classes=N_CLASSES).transpose([2,0,1])
-            #print(temp[0][0][0], temp[3][12][13])
-            print("Case 7", temp.shape, mymat.shape)
-            mymat = np.mean( np.array([ temp, mymat ]), axis=0 )
+        #print(mymat[class_id][0][0], mymat[3][12][13])
+        map = picture_from_mask(mymat, 0.5)
+        #mask = predict(img, model, patch_sz=PATCH_SZ, n_classes=N_CLASSES).transpose([2,0,1])  # make channels first
+        #map = picture_from_mask(mask, 0.5)
 
-    #print(mymat[0][0][0], mymat[3][12][13])
-    map = picture_from_mask(mymat, 0.5)
-    #mask = predict(img, model, patch_sz=PATCH_SZ, n_classes=N_CLASSES).transpose([2,0,1])  # make channels first
-    #map = picture_from_mask(mask, 0.5)
-
-    #tiff.imsave('result.tif', (255*mask).astype('uint8'))
-    tiff.imsave('result.tif', (255*mymat).astype('uint8'))
-    tiff.imsave('map.tif', map)
+        #tiff.imsave('result.tif', (255*mask).astype('uint8'))
+        tiff.imsave(test_file + str(a) + str(b) + str(c) + str(d) + '_result.tif', (255*mymat).astype('uint8'))
+        tiff.imsave(test_file + str(a) + str(b) + str(c) + str(d) + '_map.tif', map)

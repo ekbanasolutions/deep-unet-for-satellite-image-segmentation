@@ -8,17 +8,18 @@ from keras.callbacks import CSVLogger
 from keras.callbacks import TensorBoard
 from keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
 
-
+band_r, band_g, band_b, band_n = 4, 2, 1, 6 # could be 4, 2, 1, 6 or 4, 2, 1, 7
 def normalize(img):
     min = img.min()
     max = img.max()
     x = 2.0 * (img - min) / (max - min) - 1.0
     return x
 
-def take_4bands(img):
+def get_4bands(img):
     # print('The shape of original image is', img.shape)
-    # newimage = np.stack([img[:,:,0], img[:,:,1], img[:,:,2], img[:,:,3]], axis=-1)
-    newimage = img[:,:,0:4]
+
+    newimage = np.stack([img[:,:,band_r], img[:,:,band_g], img[:,:,band_b], img[:,:,band_n]], axis=-1)
+    # newimage = img[:,:,0:4]
     # print('The shape of new image is', newimage.shape) 
     return newimage
 
@@ -26,23 +27,27 @@ def take_4bands(img):
 
 N_BANDS = 4 
 N_CLASSES = 5  # buildings, roads, trees, crops and water
-CLASS_WEIGHTS = [0.2, 0.3, 0.1, 0.1, 0.3]
-N_EPOCHS = 100 #150 #150 is original value
-UPCONV = True
-PATCH_SZ = 160   # was originally 160 # should divide by 16
-BATCH_SIZE = 50  #150 #150 is original value #runs well on 20 but.. 
-TRAIN_SZ = 4000  # train size
-VAL_SZ = 1000    # validation size
+N_EPOCHS = 50 #150 #150 is original value
+CLASS_WEIGHTS = [0.2, 0.3, 0.1, 0.1, 0.3] #original
+CLASS_WEIGHTS = [0.2, 0.3, 0.2, 0.1, 0.2] #w9.hdf5
+CLASS_WEIGHTS = [0.2, 0.2, 0.2, 0.2, 0.2] #w10.hdf5
+CLASS_WEIGHTS = [0.3, 0.2, 0.3, 0.1, 0.1] #w11.hdf5
+CLASS_WEIGHTS = [0.3, 0.2, 0.2, 0.1, 0.2] #w12.hdf5
 
+PATCH_SZ = 320  # was originally 160 # should divide by 16
+BATCH_SIZE = 120  #150 #150 is original value #runs well on 20 but.. 
+TRAIN_SZ = 8000  # train size
+VAL_SZ = 4000    # validation size
+
+UPCONV = True
 
 def get_model():
     return unet_model(N_CLASSES, PATCH_SZ, n_channels=N_BANDS, upconv=UPCONV, class_weights=CLASS_WEIGHTS)
 
-
 weights_path = 'weights'
 if not os.path.exists(weights_path):
     os.makedirs(weights_path)
-weights_path += '/unet_weights.hdf5'
+weights_path += '/w12.hdf5'
 
 trainIds = [str(i).zfill(2) for i in range(1, 25)]  # all availiable ids: from "01" to "24"
 
@@ -55,7 +60,7 @@ if __name__ == '__main__':
 
     print('Reading images')
     for img_id in trainIds:
-        img_m = take_4bands(normalize(tiff.imread('./data/mband/{}.tif'.format(img_id)).transpose([1, 2, 0])))
+        img_m = get_4bands(normalize(tiff.imread('./data/mband/{}.tif'.format(img_id)).transpose([1, 2, 0])))
         mask = tiff.imread('./data/gt_mband/{}.tif'.format(img_id)).transpose([1, 2, 0]) / 255
         train_xsz = int(3/4 * img_m.shape[0])  # use 75% of image as train and 25% for validation
         X_DICT_TRAIN[img_id] = img_m[:train_xsz, :, :]
@@ -85,3 +90,5 @@ if __name__ == '__main__':
         return model
 
     train_net()
+
+
