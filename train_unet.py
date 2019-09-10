@@ -27,7 +27,7 @@ def get_4bands(img):
 
 N_BANDS = 4 
 N_CLASSES = 5  # buildings, roads, trees, crops and water
-N_EPOCHS = 50 #150 #150 is original value
+N_EPOCHS = 150 #150 #150 is original value
 CLASS_WEIGHTS = [0.2, 0.3, 0.1, 0.1, 0.3] #original
 CLASS_WEIGHTS = [0.2, 0.3, 0.2, 0.1, 0.2] #w9.hdf5
 CLASS_WEIGHTS = [0.2, 0.2, 0.2, 0.2, 0.2] #w10.hdf5
@@ -37,7 +37,7 @@ CLASS_WEIGHTS = [0.2, 0.3, 0.1, 0.1, 0.3] #w13
 CLASS_WEIGHTS = [0.2, 0.3, 0.1, 0.1, 0.3] #w14
 
 PATCH_SZ = 160  # was originally 160 # should divide by 16
-BATCH_SIZE = 2  #150 #150 is original value #runs well on 20 but.. 
+BATCH_SIZE = 5  #150 #150 is original value #runs well on 20 but.. 
 UPCONV = True
 TRAIN_SZ = 4000  # train size
 VAL_SZ = 1000
