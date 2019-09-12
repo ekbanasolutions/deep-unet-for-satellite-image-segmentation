@@ -22,7 +22,10 @@ def get_4bands(img):
     # newimage = img[:,:,0:4]
     # print('The shape of new image is', newimage.shape) 
 
-    return newimage
+    # return newimage
+
+
+
     '''returns 4 band in the order RGBN'''
  
     # print('The shape of original image is', img.shape)
@@ -65,7 +68,7 @@ if not os.path.exists(weights_path):
     os.makedirs(weights_path)
 weights_path += '/new_w16.hdf5'
 
-trainIds = [str(i).zfill(2) for i in range(1, 25)]  # all availiable ids: from "01" to "24"
+trainIds = [str(i).zfill(2) for i in range(25, 26)]  # all availiable ids: from "01" to "24"
 
 
 if __name__ == '__main__':
