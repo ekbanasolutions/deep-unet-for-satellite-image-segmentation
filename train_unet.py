@@ -17,9 +17,24 @@ def normalize(img):
 
 def get_4bands(img):
     # print('The shape of original image is', img.shape)
-
-    newimage = np.stack([img[:,:,band_r], img[:,:,band_g], img[:,:,band_b], img[:,:,band_n]], axis=-1)
+    
+    # newimage = np.stack([img[:,:,band_r], img[:,:,band_g], img[:,:,band_b], img[:,:,band_n]], axis=-1)
     # newimage = img[:,:,0:4]
+    # print('The shape of new image is', newimage.shape) 
+
+    return newimage
+    '''returns 4 band in the order RGBN'''
+ 
+    # print('The shape of original image is', img.shape)
+    if (img.shape[2] == 8):
+        newimage = np.stack([img[:,:,4], img[:,:,2], img[:,:,1], img[:,:,7]], axis=-1)
+        print ("8 band file given for inference, reading only 4 bands with index 4, 2, 1, 7")
+    elif (img.shape[2] == 4):
+        newimage = np.stack([img[:,:,0], img[:,:,1], img[:,:,2], img[:,:,3]], axis=-1)
+        print ("4 band file given for inference, reading rgbn in the index order 0123")
+    # newimage = np.stack([img[:,:,3], img[:,:,1], img[:,:,0], img[:,:,2]], axis=-1)
+    # newimage = img[:,:,0:4]
+    
     # print('The shape of new image is', newimage.shape) 
     return newimage
 
@@ -48,7 +63,7 @@ def get_model():
 weights_path = 'weights'
 if not os.path.exists(weights_path):
     os.makedirs(weights_path)
-weights_path += '/w15.hdf5'
+weights_path += '/new_w16.hdf5'
 
 trainIds = [str(i).zfill(2) for i in range(1, 25)]  # all availiable ids: from "01" to "24"
 
