@@ -31,10 +31,10 @@ def get_4bands(img):
     # print('The shape of original image is', img.shape)
     if (img.shape[2] == 8):
         newimage = np.stack([img[:,:,4], img[:,:,2], img[:,:,1], img[:,:,7]], axis=-1)
-        print ("8 band file given for inference, reading only 4 bands with index 4, 2, 1, 7")
+        print ("8 band file given for training, reading only 4 bands with index 4, 2, 1, 7")
     elif (img.shape[2] == 4):
         newimage = np.stack([img[:,:,0], img[:,:,1], img[:,:,2], img[:,:,3]], axis=-1)
-        print ("4 band file given for inference, reading rgbn in the index order 0123")
+        print ("4 band file given for training, reading rgbn in the index order 0123")
     # newimage = np.stack([img[:,:,3], img[:,:,1], img[:,:,0], img[:,:,2]], axis=-1)
     # newimage = img[:,:,0:4]
     
