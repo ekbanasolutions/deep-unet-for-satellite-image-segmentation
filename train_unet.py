@@ -45,7 +45,7 @@ def get_4bands(img):
 
 N_BANDS = 4 
 N_CLASSES = 5  # buildings, roads, trees, crops and water
-N_EPOCHS = 150 #150 #150 is original value
+N_EPOCHS = 15 #150 #150 is original value
 CLASS_WEIGHTS = [0.2, 0.3, 0.1, 0.1, 0.3] #original
 CLASS_WEIGHTS = [0.2, 0.3, 0.2, 0.1, 0.2] #w9.hdf5
 CLASS_WEIGHTS = [0.2, 0.2, 0.2, 0.2, 0.2] #w10.hdf5
@@ -66,9 +66,9 @@ def get_model():
 weights_path = 'weights'
 if not os.path.exists(weights_path):
     os.makedirs(weights_path)
-weights_path += '/new_w16.hdf5'
+weights_path += '/w16.hdf5'
 
-trainIds = [str(i).zfill(2) for i in range(25, 26)]  # all availiable ids: from "01" to "24"
+trainIds = [str(i).zfill(2) for i in range(20, 26)]  # all availiable ids: from "01" to "24"
 
 
 if __name__ == '__main__':
