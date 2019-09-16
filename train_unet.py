@@ -8,44 +8,17 @@ from keras.callbacks import CSVLogger
 from keras.callbacks import TensorBoard
 from keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
 
-band_r, band_g, band_b, band_n = 4, 2, 1, 7 # could be 4, 2, 1, 6 or 4, 2, 1, 7
+from custom_utils import save_to_verify, get_4bands
+
 def normalize(img):
     min = img.min()
     max = img.max()
     x = 2.0 * (img - min) / (max - min) - 1.0
     return x
 
-def get_4bands(img):
-    # print('The shape of original image is', img.shape)
-    
-    # newimage = np.stack([img[:,:,band_r], img[:,:,band_g], img[:,:,band_b], img[:,:,band_n]], axis=-1)
-    # newimage = img[:,:,0:4]
-    # print('The shape of new image is', newimage.shape) 
-
-    # return newimage
-
-
-
-    '''returns 4 band in the order RGBN'''
- 
-    # print('The shape of original image is', img.shape)
-    if (img.shape[2] == 8):
-        newimage = np.stack([img[:,:,4], img[:,:,2], img[:,:,1], img[:,:,7]], axis=-1)
-        print ("8 band file given for training, reading only 4 bands with index 4, 2, 1, 7")
-    elif (img.shape[2] == 4):
-        newimage = np.stack([img[:,:,0], img[:,:,1], img[:,:,2], img[:,:,3]], axis=-1)
-        print ("4 band file given for training, reading rgbn in the index order 0123")
-    # newimage = np.stack([img[:,:,3], img[:,:,1], img[:,:,0], img[:,:,2]], axis=-1)
-    # newimage = img[:,:,0:4]
-    
-    # print('The shape of new image is', newimage.shape) 
-    return newimage
-
-
-
 N_BANDS = 4 
 N_CLASSES = 5  # buildings, roads, trees, crops and water
-N_EPOCHS = 15 #150 #150 is original value
+N_EPOCHS = 150 #150 #150 is original value
 CLASS_WEIGHTS = [0.2, 0.3, 0.1, 0.1, 0.3] #original
 CLASS_WEIGHTS = [0.2, 0.3, 0.2, 0.1, 0.2] #w9.hdf5
 CLASS_WEIGHTS = [0.2, 0.2, 0.2, 0.2, 0.2] #w10.hdf5
@@ -55,7 +28,7 @@ CLASS_WEIGHTS = [0.2, 0.3, 0.1, 0.1, 0.3] #w13
 CLASS_WEIGHTS = [0.2, 0.3, 0.1, 0.1, 0.3] #w14
 
 PATCH_SZ = 160  # was originally 160 # should divide by 16
-BATCH_SIZE = 5  #150 #150 is original value #runs well on 20 but.. 
+BATCH_SIZE = 12  #150 #150 is original value #runs well on 20 but.. 
 UPCONV = True
 TRAIN_SZ = 4000  # train size
 VAL_SZ = 1000
@@ -66,9 +39,9 @@ def get_model():
 weights_path = 'weights'
 if not os.path.exists(weights_path):
     os.makedirs(weights_path)
-weights_path += '/w16.hdf5'
+weights_path += '/w17.hdf5'
 
-trainIds = [str(i).zfill(2) for i in range(20, 26)]  # all availiable ids: from "01" to "24"
+trainIds = [str(i).zfill(2) for i in range(1, 26)]  # all availiable ids: from "01" to "24"
 
 
 if __name__ == '__main__':
@@ -79,12 +52,19 @@ if __name__ == '__main__':
 
     print('Reading images')
     for img_id in trainIds:
-        img_m = get_4bands(normalize(tiff.imread('./data/mband/{}.tif'.format(img_id)).transpose([1, 2, 0])))
+        tif_img = tiff.imread('./data/mband/{}.tif'.format(img_id))
+        print ("Shape of input tif file",tif_img.shape)
+        tif_img = tif_img.transpose([1, 2, 0])
+        img_4bands, original_bands = get_4bands(tif_img)
+        save_to_verify(img_4bands, str(img_id), original_bands)
+        
+        img_4bands = normalize(img_4bands)
+
         mask = tiff.imread('./data/gt_mband/{}.tif'.format(img_id)).transpose([1, 2, 0]) / 255
-        train_xsz = int(3/4 * img_m.shape[0])  # use 75% of image as train and 25% for validation
-        X_DICT_TRAIN[img_id] = img_m[:train_xsz, :, :]
+        train_xsz = int(3/4 * img_4bands.shape[0])  # use 75% of image as train and 25% for validation
+        X_DICT_TRAIN[img_id] = img_4bands[:train_xsz, :, :]
         Y_DICT_TRAIN[img_id] = mask[:train_xsz, :, :]
-        X_DICT_VALIDATION[img_id] = img_m[train_xsz:, :, :]
+        X_DICT_VALIDATION[img_id] = img_4bands[train_xsz:, :, :]
         Y_DICT_VALIDATION[img_id] = mask[train_xsz:, :, :]
         print(img_id + ' read')
     print('Images were read')
