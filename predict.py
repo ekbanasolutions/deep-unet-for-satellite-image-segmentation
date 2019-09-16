@@ -8,9 +8,11 @@ import tifffile as tiff
 from os import sys
 import itertools
 
+from shapely.geometry.polygon import Polygon
 from PIL import Image, ImageDraw
 
 from train_unet import weights_path, get_model, normalize, PATCH_SZ, N_CLASSES 
+from map_to_json import postprocess_masks, binary_mask_to_polygon
 from custom_utils import get_4bands
 
 def predict(x, model, patch_sz=160, n_classes=5):
@@ -142,7 +144,16 @@ if __name__ == '__main__':
         #mask = predict(img, model, patch_sz=PATCH_SZ, n_classes=N_CLASSES).transpose([2,0,1])  # make channels first
     #map = picture_from_mask(mask, 0.5)
 
-    #tiff.imsave('result.tif', (255*mask).astype('uint8'))
-
     tiff.imsave(test_file + '_result.tif', (255*mymat).astype('uint8'))
     tiff.imsave(test_file + '_map.tif', map)
+    
+    bin_mask_array = postprocess_masks(mymat, img)
+
+    for cl in range(5):
+        pol = binary_mask_to_polygon(bin_mask_array[cl,:,:])
+        im = Image.new("RGB", bin_mask_array.shape[1:])
+        draw = ImageDraw.Draw(im)
+        for i in range(len(pol)):
+            draw.polygon(pol[i],outline=250)
+        im.save("class_" + str(cl) +".jpg")
+
