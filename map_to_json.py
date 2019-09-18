@@ -1,3 +1,4 @@
+import json
 import numpy as np
 from skimage import measure
 
@@ -135,4 +136,56 @@ def generate_json(result,image_path,classes):
         with open('json_files/%s.json'%filename, 'w') as outfile:
             json.dump(j_data, outfile, indent=2)
 
+def write_poly_to_json(bin_mask_array, result_path="./",tif_filename=None):
+    if tif_filename is None:
+        tif_filename = "Unknown tif file"
+        print ("The generated polygons are for ", tif_filename)
+    polygons = {
+            "tif-slice-filename": tif_filename,
+            "original-tif":"",
+            "details" : {
+                "lat-long": {
+                    "top":"",
+                    "left":"",
+                    "bottom":"",
+                    "right":""
+                },
+                "class0": {},
+                "class1": {},
+                "class2": {},
+                "class3": {},
+                "class4": {}
+                }
+            }
+    
+    colors = {
+        0: (150, 150, 150),  # Buildings
+        1: (223, 194, 125),  # Roads & Tracks
+        2: (27, 120, 55),    # Trees
+        3: (166, 219, 160),  # Crops
+        4: (116, 173, 209)   # Water
+    }
+
+    classes= {
+        0: "Buildings",
+        1: "Roads & Tracks",
+        2: "Trees",
+        3: "Crops",
+        4: "Water"
+    }
+
+    for cl in range(5):
+        pol = binary_mask_to_polygon(bin_mask_array[cl,:,:])
+        print ("There are {} polygons in class {}".format(len(pol), cl))
+        # TODO: Save images for visualization in separate function / module
+        # im = Image.new("RGB", bin_mask_array.shape[1:])
+        # draw = ImageDraw.Draw(im)
+        for i in range(len(pol)):
+            polygons["details"]["class"+str(cl)][str(i)] = pol[i]
+            break
+            # draw.polygon(pol[i], outline=colors[cl], fill=colors[cl])
+        # im.save("class_" + str(cl) +".jpg")
+    print (json.dumps(polygons, indent=4))
+    with open(result_path + '/' + tif_filename + '_polys.json', 'w') as json_file:
+        json.dump(polygons, json_file, indent=4)
 

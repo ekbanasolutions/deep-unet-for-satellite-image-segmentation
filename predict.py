@@ -12,7 +12,7 @@ from shapely.geometry.polygon import Polygon
 from PIL import Image, ImageDraw
 
 from train_unet import weights_path, get_model, normalize, PATCH_SZ, N_CLASSES 
-from map_to_json import postprocess_masks, binary_mask_to_polygon
+from map_to_json import postprocess_masks, binary_mask_to_polygon, write_poly_to_json
 from custom_utils import get_4bands
 
 def predict(x, model, patch_sz=160, n_classes=5):
@@ -148,12 +148,5 @@ if __name__ == '__main__':
     tiff.imsave(test_file + '_map.tif', map)
     
     bin_mask_array = postprocess_masks(mymat, img)
-
-    for cl in range(5):
-        pol = binary_mask_to_polygon(bin_mask_array[cl,:,:])
-        im = Image.new("RGB", bin_mask_array.shape[1:])
-        draw = ImageDraw.Draw(im)
-        for i in range(len(pol)):
-            draw.polygon(pol[i],outline=250)
-        im.save("class_" + str(cl) +".jpg")
-
+    write_poly_to_json(bin_mask_array, os.path.split(test_file)[0], os.path.split(test_file)[1])
+    
