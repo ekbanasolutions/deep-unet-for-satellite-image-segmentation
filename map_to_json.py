@@ -182,7 +182,6 @@ def write_poly_to_json(bin_mask_array, result_path="./",tif_filename=None):
         # draw = ImageDraw.Draw(im)
         for i in range(len(pol)):
             polygons["details"]["class"+str(cl)][str(i)] = pol[i]
-            break
             # draw.polygon(pol[i], outline=colors[cl], fill=colors[cl])
         # im.save("class_" + str(cl) +".jpg")
     print (json.dumps(polygons, indent=4))
