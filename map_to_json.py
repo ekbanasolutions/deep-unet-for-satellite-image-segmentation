@@ -143,18 +143,18 @@ def write_poly_to_json(bin_mask_array, result_path="./",tif_filename=None):
     polygons = {
             "tif-slice-filename": tif_filename,
             "original-tif":"",
-            "details" : {
-                "lat-long": {
-                    "top":"",
-                    "left":"",
-                    "bottom":"",
-                    "right":""
+            "slice-georef": {
+                "top":"",
+                "left":"",
+                "bottom":"",
+                "right":""
                 },
-                "class0": {},
-                "class1": {},
-                "class2": {},
-                "class3": {},
-                "class4": {}
+            "details" : {
+                "Buildings": {},
+                "Roads & Tracks": {},
+                "Trees": {},
+                "Crops": {},
+                "Water": {}
                 }
             }
     
@@ -166,7 +166,7 @@ def write_poly_to_json(bin_mask_array, result_path="./",tif_filename=None):
         4: (116, 173, 209)   # Water
     }
 
-    classes= {
+    class_label= {
         0: "Buildings",
         1: "Roads & Tracks",
         2: "Trees",
@@ -174,14 +174,14 @@ def write_poly_to_json(bin_mask_array, result_path="./",tif_filename=None):
         4: "Water"
     }
 
-    for cl in range(5):
+    for cl, label in class_label.items():
         pol = binary_mask_to_polygon(bin_mask_array[cl,:,:])
-        print ("There are {} polygons in class {}".format(len(pol), cl))
+        print ("There are {} polygons in class {}".format(len(pol), label))
         # TODO: Save images for visualization in separate function / module
         # im = Image.new("RGB", bin_mask_array.shape[1:])
         # draw = ImageDraw.Draw(im)
         for i in range(len(pol)):
-            polygons["details"]["class"+str(cl)][str(i)] = pol[i]
+            polygons["details"][label][str(i)] = pol[i]
             # draw.polygon(pol[i], outline=colors[cl], fill=colors[cl])
         # im.save("class_" + str(cl) +".jpg")
     print (json.dumps(polygons, indent=4))
