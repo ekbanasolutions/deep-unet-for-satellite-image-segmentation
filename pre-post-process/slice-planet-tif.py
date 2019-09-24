@@ -173,37 +173,8 @@ for rangex in range (int(cols/xBlockSize)):
                 }
 
 
-# In[4]:
-
-
-json.__version__
-
-
-# In[5]:
-
-
-print (json_file_path)
-# Python version 3.6.8
-# json version 2.0.9
-
 with open(json_file_path, 'w') as f:
     json.dump(json_data, f, indent=4)
 
-
-# In[6]:
-
-
-print (json.dumps(json_data, indent=4))
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
+# print (json.dumps(json_data, indent=4))i
 
