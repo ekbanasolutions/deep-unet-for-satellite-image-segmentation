@@ -95,7 +95,8 @@ if __name__ == '__main__':
     
     all_sliced_tifs = os.listdir('/home/ekbana/computer_vision/satellite-image/Planet.com/Planet_Data_Sliced/tif/')
     all_sliced_tifs = [file for file in all_sliced_tifs if file[-4:] == ".tif"]
-    for test_file in all_sliced_tifs[0:]:
+    total_files_count = len(all_sliced_tifs)
+    for current_file_count, test_file in enumerate(all_sliced_tifs[0:]):
         test_filename = test_file
         print ("...running inference for {}".format(test_filename))
         test_file = "../Planet.com/Planet_Data_Sliced/tif/" + test_file
@@ -169,5 +170,4 @@ if __name__ == '__main__':
         print ("...saving binary mask to polygon of each class")
         mask_array_to_poly_json(bin_mask_array, os.path.split(test_file)[0], os.path.split(test_file)[1])
         print ("Everything complete for {}".format(test_filename))
-
-
+        print ("Completed {} out of {}".format(current_file_count, total_files_count))
