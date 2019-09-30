@@ -1,6 +1,7 @@
 import json
 import numpy as np
 from skimage import measure
+from PIL import Image, ImageDraw
 
 def close_contour(contour):
     if not np.array_equal(contour[0], contour[-1]):
@@ -20,9 +21,11 @@ def postprocess_masks(result, image, min_nuc_size=10):
     for row in range(height):
         for col in range(width):
             for cl in range(n_classes):
+                temp_val = result[cl,row,col] 
                 if result[cl,row,col] == max(result[:,row,col]):
                     result[:,row,col] = np.zeros(n_classes)
-                    result[cl, row, col] = 1
+                    if temp_val > 0.5:
+                        result[cl, row, col] = 1
 
     return result
 
@@ -132,7 +135,7 @@ def generate_json(result,image_path,classes):
         with open('json_files/%s.json'%filename, 'w') as outfile:
             json.dump(j_data, outfile, indent=2)
 
-def write_poly_to_json(bin_mask_array, result_path="./",tif_filename=None):
+def mask_array_to_poly_json(bin_mask_array, result_path="./",tif_filename=None):
     if tif_filename is None:
         tif_filename = "Unknown tif file"
         # print ("The generated polygons are for ", tif_filename)
