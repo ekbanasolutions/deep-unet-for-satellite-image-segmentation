@@ -12,7 +12,7 @@ from shapely.geometry.polygon import Polygon
 from PIL import Image, ImageDraw
 
 from train_unet import weights_path, get_model, normalize, PATCH_SZ, N_CLASSES 
-from map_to_json import postprocess_masks, binary_mask_to_polygon, write_poly_to_json
+from map_to_json import postprocess_masks, mask_array_to_poly_json   
 from custom_utils import get_4bands
 
 def predict(x, model, patch_sz=160, n_classes=5):
@@ -155,16 +155,19 @@ if __name__ == '__main__':
         print ("...prediction complete. Results Shape = ", results.shape)
         #print(mymat[class_id][0][0], mymat[3][12][13])
         print ("...creating map from result")
-        map = picture_from_mask(mymat, 0.3)
+        map = picture_from_mask(mymat, 0.5)
             #mask = predict(img, model, patch_sz=PATCH_SZ, n_classes=N_CLASSES).transpose([2,0,1])  # make channels first
         #map = picture_from_mask(mask, 0.5)
         print ("...saving result for {}".format(test_filename))
         tiff.imsave(test_file + '_result.tif', (255*mymat).astype('uint8'))
         print ("...saving map for {}".format(test_filename))
         tiff.imsave(test_file + '_map.tif', map)
+
+        # TODO: Do the following task in post-process
         print ("...creating binary mask of the result from probability matrix") 
         bin_mask_array = postprocess_masks(mymat, img)
         print ("...saving binary mask to polygon of each class")
-        write_poly_to_json(bin_mask_array, os.path.split(test_file)[0], os.path.split(test_file)[1])
+        mask_array_to_poly_json(bin_mask_array, os.path.split(test_file)[0], os.path.split(test_file)[1])
         print ("Everything complete for {}".format(test_filename))
+
 
