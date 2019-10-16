@@ -115,14 +115,10 @@ def pixeldata_to_latlongdata(poly_data_pixel, tif_slice_georef):
 
 def latlongdata_to_shapefile(poly_latlong_data, filename):
     print ("Writing multipolygon shp file.")
-    schema = {
-        'geometry': 'Polygon',
-        'properties': {'class': 'str', 'id':'int'},
-    }
     
     for class_label, cl_data in poly_latlong_data['details'].items():
         if class_label == 'Trees':
-            with fiona.open("/home/ekbana/computer_vision/satellite-image/Planet.com/Planet_Data_Sliced/tif/result/Postprocess-Result/" + class_label + filename + '.shp', 'w', 'ESRI Shapefile', schema) as c:
+            
             # cl_data = poly_latlong_data['details'][class_label]
             for key, polygon  in cl_data.items():
                 try:
@@ -146,33 +142,32 @@ def latlongdata_to_shapefile(poly_latlong_data, filename):
 
 
 
+schema = {
+        'geometry': 'Polygon',
+        'properties': {'class': 'str', 'id':'int'},
+    }
+with fiona.open("/home/ekbana/computer_vision/satellite-image/Planet.com/Planet_Data_Sliced/tif/result/Postprocess-Result/all_trees.shp", 'w', 'ESRI Shapefile', schema) as c: 
+    for result_filename in result_filenames:
+        print ("...post processing for {}".format(result_filename))
+        with open(result_path + result_filename) as json_fp:
+            poly_data_pixel = json.loads(json_fp.read())                
+            this_slice = poly_data_pixel['tif-slice-filename']
+            original_tif = poly_data_pixel['tif-slice-filename'].split(".")[0]+'.tif'
+            poly_data_pixel['original-tif'] = original_tif
+            meta_filename = original_tif + "_info.json"
+
+            with open(meta_path + meta_filename) as meta_fp:
+                meta_data = json.loads(meta_fp.read())
+
+                transform_params = meta_data['geotransform-params']
+                # geo_ref = meta_data[this_slice]
+
+            #buildings = poly_data['details']['class0']
 
 
+            geo_ref = get_georef(this_slice, meta_data)
+            poly_latlong_data = pixeldata_to_latlongdata(poly_data_pixel, tif_slice_georef = geo_ref)
 
-
-
-
-for result_filename in result_filenames:
-    print ("...post processing for {}".format(result_filename))
-    with open(result_path + result_filename) as json_fp:
-        poly_data_pixel = json.loads(json_fp.read())                
-        this_slice = poly_data_pixel['tif-slice-filename']
-        original_tif = poly_data_pixel['tif-slice-filename'].split(".")[0]+'.tif'
-        poly_data_pixel['original-tif'] = original_tif
-        meta_filename = original_tif + "_info.json"
-
-        with open(meta_path + meta_filename) as meta_fp:
-            meta_data = json.loads(meta_fp.read())
-
-            transform_params = meta_data['geotransform-params']
-            # geo_ref = meta_data[this_slice]
-
-        #buildings = poly_data['details']['class0']
-
-
-        geo_ref = get_georef(this_slice, meta_data)
-        poly_latlong_data = pixeldata_to_latlongdata(poly_data_pixel, tif_slice_georef = geo_ref)
-
-        with open(result_path + result_filename + "latlong.json", "w") as json_fp:
-            json.dump(poly_latlong_data, json_fp, indent=4)
-            latlongdata_to_shapefile(poly_latlong_data, result_filename)
+            with open(result_path + result_filename + "latlong.json", "w") as json_fp:
+                json.dump(poly_latlong_data, json_fp, indent=4)
+                latlongdata_to_shapefile(poly_latlong_data, result_filename)

@@ -156,7 +156,7 @@ if __name__ == '__main__':
         print ("...prediction complete. Results Shape = ", results.shape)
         #print(mymat[class_id][0][0], mymat[3][12][13])
         print ("...creating map from result")
-        map = picture_from_mask(mymat, 0.5)
+        map = picture_from_mask(mymat, 0.6)
             #mask = predict(img, model, patch_sz=PATCH_SZ, n_classes=N_CLASSES).transpose([2,0,1])  # make channels first
         #map = picture_from_mask(mask, 0.5)
         print ("...saving result for {}".format(test_filename))

@@ -24,7 +24,7 @@ def postprocess_masks(result, image, min_nuc_size=10):
                 temp_val = result[cl,row,col] 
                 if result[cl,row,col] == max(result[:,row,col]):
                     result[:,row,col] = np.zeros(n_classes)
-                    if temp_val > 0.5:
+                    if temp_val > 0.6:
                         result[cl, row, col] = 1
 
     return result
@@ -174,13 +174,14 @@ def mask_array_to_poly_json(bin_mask_array, result_path="./",tif_filename=None):
     }
 
     for cl, label in class_label.items():
-        pol = binary_mask_to_polygon(bin_mask_array[cl,:,:])
+        if label == 'Trees':
+            pol = binary_mask_to_polygon(bin_mask_array[cl,:,:])
         # print ("There are {} polygons in class {}".format(len(pol), label))
         # TODO: Save images for visualization in separate function / module
         # im = Image.new("RGB", bin_mask_array.shape[1:])
         # draw = ImageDraw.Draw(im)
-        for i in range(len(pol)):
-            polygons["details"][label][str(i)] = pol[i]
+            for i in range(len(pol)):
+                polygons["details"][label][str(i)] = pol[i]
             # draw.polygon(pol[i], outline=colors[cl], fill=colors[cl])
         # im.save("class_" + str(cl) +".jpg")
     # print (json.dumps(polygons, indent=4))
