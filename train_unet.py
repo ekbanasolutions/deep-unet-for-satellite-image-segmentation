@@ -56,7 +56,7 @@ if __name__ == '__main__':
         print ("Shape of input tif file",tif_img.shape)
         tif_img = tif_img.transpose([1, 2, 0])
         img_4bands, original_bands = get_4bands(tif_img)
-        save_to_verify(img_4bands, str(img_id), original_bands)
+        # save_to_verify(img_4bands, str(img_id), original_bands)
         
         img_4bands = normalize(img_4bands)
 
