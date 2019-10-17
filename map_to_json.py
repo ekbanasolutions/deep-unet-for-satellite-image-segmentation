@@ -24,7 +24,7 @@ def postprocess_masks(result, image, min_nuc_size=10):
                 temp_val = result[cl,row,col] 
                 if result[cl,row,col] == max(result[:,row,col]):
                     result[:,row,col] = np.zeros(n_classes)
-                    if temp_val > 0.6:
+                    if temp_val > 0.5:
                         result[cl, row, col] = 1
 
     return result
@@ -135,7 +135,7 @@ def generate_json(result,image_path,classes):
         with open('json_files/%s.json'%filename, 'w') as outfile:
             json.dump(j_data, outfile, indent=2)
 
-def mask_array_to_poly_json(bin_mask_array, result_path="./",tif_filename=None):
+def mask_array_to_poly_json(bin_mask_array, result_path="./result/",tif_filename=None):
     if tif_filename is None:
         tif_filename = "Unknown tif file"
         # print ("The generated polygons are for ", tif_filename)
