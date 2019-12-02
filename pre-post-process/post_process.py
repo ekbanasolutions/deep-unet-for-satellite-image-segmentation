@@ -39,6 +39,7 @@ print (x2, y2)
 
 
 result_path = '/home/ekbana/computer_vision/satellite-image/Planet.com/Planet_Data_Sliced/tif/result/'
+post_proc_temp_path = result_path + 'Post-Process-Temp/'
 result_filenames = os.listdir(result_path)
 result_filenames = [file for file in result_filenames if file[-10:] == 'polys.json']
 
@@ -172,6 +173,6 @@ for result_filename in result_filenames:
         geo_ref = get_georef(this_slice, meta_data)
         poly_latlong_data = pixeldata_to_latlongdata(poly_data_pixel, tif_slice_georef = geo_ref)
 
-        with open(result_path + result_filename + "latlong.json", "w") as json_fp:
+        with open(post_proc_temp_path + result_filename + "latlong.json", "w") as json_fp:
             json.dump(poly_latlong_data, json_fp, indent=4)
             latlongdata_to_shapefile(poly_latlong_data, result_filename, c)
