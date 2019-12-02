@@ -86,8 +86,8 @@ for tiff_file in all_large_tiff_files:
     # xBlockSize = blockSize[0]
     # yBlockSize = blockSize[1]
 
-    xBlockSize = 1850
-    yBlockSize = 1850 
+    xBlockSize = 850
+    yBlockSize = 850
 
     WRITE_TIF = 1 # Make this 1 to write the TIF FiLE
     WRITE_JPEG = 1 # Make this 1 to write the TIF FiLE
