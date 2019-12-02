@@ -46,8 +46,6 @@ meta_path = '/home/ekbana/computer_vision/satellite-image/Planet.com/Planet-Data
 
 all_meta_files = os.listdir(meta_path)
 all_meta_files = [meta_filename for meta_filename in all_meta_files if meta_filename[-9:] == 'info.json']
-meta_filename = '20190421_185910_ssc6_u0002_pansharpened_clip.tif_info.json'
-
 
 def get_georef(this_slice, meta_data):
     return meta_data[this_slice]
@@ -146,13 +144,14 @@ schema = {
         'geometry': 'Polygon',
         'properties': {'class': 'str', 'id':'int'},
     }
-with fiona.open("/home/ekbana/computer_vision/satellite-image/Planet.com/Planet_Data_Sliced/tif/result/Postprocess-Result/all_trees.shp", 'w', 'ESRI Shapefile', schema) as c: 
-    for result_filename in result_filenames:
-        print ("...post processing for {}".format(result_filename))
-        with open(result_path + result_filename) as json_fp:
-            poly_data_pixel = json.loads(json_fp.read())                
-            this_slice = poly_data_pixel['tif-slice-filename']
-            original_tif = poly_data_pixel['tif-slice-filename'].split(".")[0]+'.tif'
+
+for result_filename in result_filenames:
+    print ("...post processing for {}".format(result_filename))
+    with open(result_path + result_filename) as json_fp:
+        poly_data_pixel = json.loads(json_fp.read())
+        this_slice = poly_data_pixel['tif-slice-filename']
+        original_tif = poly_data_pixel['tif-slice-filename'].split(".")[0]+'.tif'
+        with fiona.open("/home/ekbana/computer_vision/satellite-image/Planet.com/Planet_Data_Sliced/tif/result/Postprocess-Result/trees_" + original_tif + ".shp", 'w', 'ESRI Shapefile', schema) as c:
             poly_data_pixel['original-tif'] = original_tif
             meta_filename = original_tif + "_info.json"
 
