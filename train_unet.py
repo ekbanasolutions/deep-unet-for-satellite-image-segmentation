@@ -18,7 +18,7 @@ def normalize(img):
 
 N_BANDS = 4 
 N_CLASSES = 5  # buildings, roads, trees, crops and water
-N_EPOCHS = 150 #150 #150 is original value
+N_EPOCHS = 25 #150 #150 is original value
 CLASS_WEIGHTS = [0.2, 0.3, 0.1, 0.1, 0.3] #original
 CLASS_WEIGHTS = [0.2, 0.3, 0.2, 0.1, 0.2] #w9.hdf5
 CLASS_WEIGHTS = [0.2, 0.2, 0.2, 0.2, 0.2] #w10.hdf5
@@ -34,12 +34,15 @@ CLASS_WEIGHTS = [0.2, 0.3, 0.2, 0.2, 0.1] #w21
 CLASS_WEIGHTS = [0.2, 0.25, 0.2, 0.1, 0.35] #w22
 CLASS_WEIGHTS = [0.3, 0.3, 0.2, 0.1, 0.1] #w23
 CLASS_WEIGHTS = [0.2, 0.3, 0.1, 0.1, 0.3] #w24
+CLASS_WEIGHTS = [0.2, 0.3, 0.1, 0.1, 0.3] #w25
+CLASS_WEIGHTS = [0.2, 0.3, 0.1, 0.1, 0.3] #w26
+CLASS_WEIGHTS = [0.2, 0.3, 0.1, 0.1, 0.3] #w27
 
 # w24: image range(25, 27) CLASS_WEIGHTS = [0.3, 0.3, 0.2, 0.1, 0.1]
 
 
 PATCH_SZ = 160  # was originally 160 # should divide by 16
-BATCH_SIZE = 2  #150 #150 is original value #runs well on 20 but.. 
+BATCH_SIZE = 50  #150 #150 is original value #runs well on 20 but.. 
 UPCONV = True
 TRAIN_SZ = 4000  # train size
 VAL_SZ = 1000
@@ -50,10 +53,12 @@ def get_model():
 weights_path = 'weights'
 if not os.path.exists(weights_path):
     os.makedirs(weights_path)
-weights_path += '/w24.hdf5'
+weights_path += '/w27.hdf5'
 
-trainIds = [str(i).zfill(2) for i in range(1, 27)]  # all availiable ids: from "1" to "26"
-
+# trainIds = [str(i).zfill(2) for i in range(1, 25)]  # all availiable ids: from "1" to "27" #w23
+# trainIds = [str(i).zfill(2) for i in range(1, 27)]  # all availiable ids: from "1" to "31" #w24 (1 - 32)
+trainIds = [str(i).zfill(2) for i in range(1, 41)]  # all availiable ids: from "1" to "40" #w26
+trainIds = [str(i).zfill(2) for i in range(1, 50)]  # all availiable ids: from "1" to "59" #w27
 
 if __name__ == '__main__':
     X_DICT_TRAIN = dict()
