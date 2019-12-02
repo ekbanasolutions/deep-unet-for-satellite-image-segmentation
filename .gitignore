@@ -102,3 +102,17 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+#data
+data/
+
+#logs
+log_unet.csv
+tensorboard/
+
+
+#project IDE's
+.idea/
+
+#Weights
+weights
