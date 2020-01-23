@@ -79,23 +79,21 @@ def picture_from_mask(mask, threshold=0):
     return pict
 
 if __name__ == '__main__':
-    model = get_model()
-    
+    if len(sys.argv)<2:
+        print("Enter weight path (eg. ./weights/w28.py)")
+        sys.exit()
+
+    weights_path = sys.argv[1]
+
     print ("----------------------------------------------------------------------------")
+    model = get_model()
     print ("...model loaded")
-    if len(sys.argv) == 3:
-        weights_path = sys.argv[2]
     print ("...loading weights from ", weights_path)
     model.load_weights(weights_path)
-    if len(sys.argv)<2:
-        print("Enter file path")
-
-    # test_file = sys.argv[1]
-    # test_id = sys.argv[1]
-    # test_id = '23'
     
-    all_sliced_tifs = os.listdir('/home/ekbana/computer_vision/satellite-image/Planet.com/Planet_Data_Sliced/tif/')
+    all_sliced_tifs = os.listdir('/home/ekbana/computer_vision/satellite-image/Planet.com/Planet_Data_Sliced/tif/all-sliced-tiff-850px/')
     result_path = "../Planet.com/Planet_Data_Sliced/tif/result/"
+
     all_sliced_tifs = [file for file in all_sliced_tifs if file[-4:] == ".tif"]
     total_files_count = len(all_sliced_tifs)
     for current_file_count, test_file in enumerate(all_sliced_tifs[0:]):
