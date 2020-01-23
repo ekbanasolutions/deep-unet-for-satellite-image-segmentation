@@ -1,7 +1,10 @@
+os.environ["CUDA_VISIBLE_DEVICES"] = "0, 1" # second gpu
+
 from unet_model import *
 from gen_patches import *
 
 import os.path
+from os import sys
 import numpy as np
 import tifffile as tiff
 from keras.callbacks import CSVLogger
@@ -20,26 +23,7 @@ N_BANDS = 4
 N_CLASSES = 5  # buildings, roads, trees, crops and water
 N_EPOCHS = 25 #150 #150 is original value
 CLASS_WEIGHTS = [0.2, 0.3, 0.1, 0.1, 0.3] #original
-CLASS_WEIGHTS = [0.2, 0.3, 0.2, 0.1, 0.2] #w9.hdf5
-CLASS_WEIGHTS = [0.2, 0.2, 0.2, 0.2, 0.2] #w10.hdf5
-CLASS_WEIGHTS = [0.3, 0.2, 0.3, 0.1, 0.1] #w11.hdf5
-CLASS_WEIGHTS = [0.3, 0.2, 0.2, 0.1, 0.2] #w12.hdf5
-CLASS_WEIGHTS = [0.2, 0.3, 0.1, 0.1, 0.3] #w13
-CLASS_WEIGHTS = [0.2, 0.3, 0.1, 0.1, 0.3] #w14
-CLASS_WEIGHTS = [0.2, 0.3, 0.2, 0.1, 0.2] #w19
-CLASS_WEIGHTS = [0.2, 0.25, 0.25, 0.1, 0.2] #w19- (after 7th epoch)
-CLASS_WEIGHTS = [0.2, 0.3, 0.2, 0.1, 0.2] #w20
-CLASS_WEIGHTS = [0.2, 0.3, 0.2, 0.2, 0.1] #w20
-CLASS_WEIGHTS = [0.2, 0.3, 0.2, 0.2, 0.1] #w21
-CLASS_WEIGHTS = [0.2, 0.25, 0.2, 0.1, 0.35] #w22
-CLASS_WEIGHTS = [0.3, 0.3, 0.2, 0.1, 0.1] #w23
-CLASS_WEIGHTS = [0.2, 0.3, 0.1, 0.1, 0.3] #w24
-CLASS_WEIGHTS = [0.2, 0.3, 0.1, 0.1, 0.3] #w25
-CLASS_WEIGHTS = [0.2, 0.3, 0.1, 0.1, 0.3] #w26
-CLASS_WEIGHTS = [0.2, 0.3, 0.1, 0.1, 0.3] #w27
-
-# w24: image range(25, 27) CLASS_WEIGHTS = [0.3, 0.3, 0.2, 0.1, 0.1]
-
+CLASS_WEIGHTS = [0.2, 0.3, 0.1, 0.1, 0.3] #w28
 
 PATCH_SZ = 160  # was originally 160 # should divide by 16
 BATCH_SIZE = 50  #150 #150 is original value #runs well on 20 but.. 
@@ -53,14 +37,16 @@ def get_model():
 weights_path = 'weights'
 if not os.path.exists(weights_path):
     os.makedirs(weights_path)
-weights_path += '/w27.hdf5'
 
-# trainIds = [str(i).zfill(2) for i in range(1, 25)]  # all availiable ids: from "1" to "27" #w23
-# trainIds = [str(i).zfill(2) for i in range(1, 27)]  # all availiable ids: from "1" to "31" #w24 (1 - 32)
-trainIds = [str(i).zfill(2) for i in range(1, 41)]  # all availiable ids: from "1" to "40" #w26
-trainIds = [str(i).zfill(2) for i in range(1, 50)]  # all availiable ids: from "1" to "59" #w27
+trainIds = [str(i).zfill(2) for i in range(1, 50)]  # all availiable ids: from "1" to "59" #w28
 
 if __name__ == '__main__':
+    if len(sys.argv)<2:
+        print("Enter weight path (eg. w37.hdf5)")
+        sys.exit()
+
+    weights_path += '/' + sys.argv[1]
+
     X_DICT_TRAIN = dict()
     Y_DICT_TRAIN = dict()
     X_DICT_VALIDATION = dict()
