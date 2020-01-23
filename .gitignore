@@ -113,6 +113,7 @@ tensorboard_unet/
 
 #project IDE's
 .idea/
+.vscode/
 
 #Weights
 weights
