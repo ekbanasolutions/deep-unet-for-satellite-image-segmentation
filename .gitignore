@@ -109,7 +109,7 @@ data/
 #logs
 log_unet.csv
 tensorboard/
-
+tensorboard_unet/
 
 #project IDE's
 .idea/
