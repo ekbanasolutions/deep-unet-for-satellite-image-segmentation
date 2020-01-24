@@ -99,8 +99,9 @@ def pixeldata_to_latlongdata(poly_data_pixel, tif_slice_georef):
         3: "Crops",
         4: "Water"
     }
-    for cl in range(2,3): #do only for trees, otherwise do range(5)
+    for cl in range(5): #do only for trees, otherwise do range(5)
         cl_data = poly_data_pixel['details'][class_label[cl]]
+        print (len(cl_data), "data found in class_label: ", class_label[cl])
         new_cl_data = {}
         for key, polygon in cl_data.items():
             new_cl_data[str(key)] = []
@@ -112,11 +113,11 @@ def pixeldata_to_latlongdata(poly_data_pixel, tif_slice_georef):
         poly_data_pixel['details'][class_label[cl]] = new_cl_data
     return poly_data_pixel
 
-def latlongdata_to_shapefile(poly_latlong_data, filename, shapefile_handler):
+def latlongdata_to_shapefile(poly_latlong_data, filename, shapefile_handler, original_tif):
     print ("Writing multipolygon shp file.")
     
     for class_label, cl_data in poly_latlong_data['details'].items():
-        if class_label == 'Trees':
+        if class_label == 'Water':
             
             # cl_data = poly_latlong_data['details'][class_label]
             for key, polygon  in cl_data.items():
@@ -130,7 +131,8 @@ def latlongdata_to_shapefile(poly_latlong_data, filename, shapefile_handler):
                     'geometry': mapping(poly),
                     'properties': {
                         'class': class_label,
-                        'id':int(key)
+                        'id':int(key),
+                        'original_tif':original_tif
                     }
                 })
 
@@ -143,12 +145,12 @@ def latlongdata_to_shapefile(poly_latlong_data, filename, shapefile_handler):
 
 schema = {
         'geometry': 'Polygon',
-        'properties': {'class': 'str', 'id':'int'},
+        'properties': {'class': 'str', 'id': 'int', 'original_tif': 'str'},
     }
 
 previous_original_tif = None
 result_filenames = sorted(result_filenames)
-c = fiona.open("/home/ekbana/computer_vision/satellite-image/Planet.com/Planet_Data_Sliced/tif/result/Postprocess-Result/trees_all.shp", 'w', 'ESRI Shapefile', schema)
+c = fiona.open("/home/ekbana/computer_vision/satellite-image/Planet.com/Planet_Data_Sliced/tif/result/Postprocess-Result/result_all.shp", 'w', 'ESRI Shapefile', schema)
 for result_filename in result_filenames:
     print ("...post processing for {}".format(result_filename))
     with open(result_path + result_filename) as json_fp:
@@ -157,7 +159,7 @@ for result_filename in result_filenames:
         original_tif = poly_data_pixel['tif-slice-filename'].split(".")[0]+'.tif'
         if original_tif != previous_original_tif:
             previous_original_tif = original_tif
-            # c = fiona.open("/home/ekbana/computer_vision/satellite-image/Planet.com/Planet_Data_Sliced/tif/result/Postprocess-Result/trees_" + original_tif + ".shp", 'w', 'ESRI Shapefile', schema)
+            # c = fiona.open("/home/ekbana/computer_vision/satellite-image/Planet.com/Planet_Data_Sliced/tif/result/Postprocess-Result/trees_" + original_tif + "_all.shp", 'w', 'ESRI Shapefile', schema)
         poly_data_pixel['original-tif'] = original_tif
         meta_filename = original_tif + "_info.json"
 
@@ -175,4 +177,4 @@ for result_filename in result_filenames:
 
         with open(post_proc_temp_path + result_filename + "latlong.json", "w") as json_fp:
             json.dump(poly_latlong_data, json_fp, indent=4)
-            latlongdata_to_shapefile(poly_latlong_data, result_filename, c)
+            latlongdata_to_shapefile(poly_latlong_data, result_filename, c, original_tif)

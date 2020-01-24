@@ -135,7 +135,7 @@ def generate_json(result,image_path,classes):
         with open('json_files/%s.json'%filename, 'w') as outfile:
             json.dump(j_data, outfile, indent=2)
 
-def mask_array_to_poly_json(bin_mask_array, result_path="./result/",tif_filename=None):
+def mask_array_to_poly_json(bin_mask_array, result_path="./result/",tif_filename=None,reqd_class_label=['Trees', 'Crops', 'Water', "Roads & Tracks", "Buildings"]):
     if tif_filename is None:
         tif_filename = "Unknown tif file"
         # print ("The generated polygons are for ", tif_filename)
@@ -174,7 +174,7 @@ def mask_array_to_poly_json(bin_mask_array, result_path="./result/",tif_filename
     }
 
     for cl, label in class_label.items():
-        if label == 'Trees':
+        if label in reqd_class_label:
             pol = binary_mask_to_polygon(bin_mask_array[cl,:,:])
         # print ("There are {} polygons in class {}".format(len(pol), label))
         # TODO: Save images for visualization in separate function / module
@@ -185,6 +185,7 @@ def mask_array_to_poly_json(bin_mask_array, result_path="./result/",tif_filename
             # draw.polygon(pol[i], outline=colors[cl], fill=colors[cl])
         # im.save("class_" + str(cl) +".jpg")
     # print (json.dumps(polygons, indent=4))
+    
     with open(result_path + '/' + tif_filename + '_polys.json', 'w') as json_file:
         json.dump(polygons, json_file, indent=4)
 
