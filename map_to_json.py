@@ -9,12 +9,12 @@ def close_contour(contour):
     return contour
 
 
-def postprocess_masks(result, image, min_nuc_size=10):
+def postprocess_masks(result, image_shp, min_nuc_size=10):
 
     """Clean overlaps between bounding boxes, fill small holes, smooth boundaries"""
     """Convert probability for each class into (one hot encoded) mask""" 
 
-    height, width = image.shape[:2]
+    height, width = image_shp[:2]
     n_classes = result.shape[0]
     sth = np.zeros(result.shape)
 
@@ -135,7 +135,7 @@ def generate_json(result,image_path,classes):
         with open('json_files/%s.json'%filename, 'w') as outfile:
             json.dump(j_data, outfile, indent=2)
 
-def mask_array_to_poly_json(bin_mask_array, result_path="./result/",tif_filename=None,reqd_class_label=['Trees', 'Crops', 'Water', "Roads & Tracks", "Buildings"]):
+def mask_array_to_poly_json(bin_mask_array, result_path="./result/",tif_filename=None, reqd_class_label=['Trees', 'Crops', 'Water', "Roads & Tracks", "Buildings"]):
     if tif_filename is None:
         tif_filename = "Unknown tif file"
         # print ("The generated polygons are for ", tif_filename)
@@ -185,7 +185,7 @@ def mask_array_to_poly_json(bin_mask_array, result_path="./result/",tif_filename
             # draw.polygon(pol[i], outline=colors[cl], fill=colors[cl])
         # im.save("class_" + str(cl) +".jpg")
     # print (json.dumps(polygons, indent=4))
-    
+
     with open(result_path + '/' + tif_filename + '_polys.json', 'w') as json_file:
         json.dump(polygons, json_file, indent=4)
 

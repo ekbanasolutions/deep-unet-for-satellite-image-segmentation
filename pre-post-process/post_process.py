@@ -22,8 +22,26 @@ import utm
 from shapely.geometry import mapping, Polygon
 import fiona
 
+import tifffile as tiff
+from map_to_json import postprocess_masks, mask_array_to_poly_json
+from predict import picture_from_mask
 
+result_path = "../../Planet.com/Planet_Data_Sliced/tif/result/"
+all_result_tifs = os.listdir(result_path)
+all_map_tifs = [file for file in all_result_tifs if file[-8:] == "_map.tif"]
+all_result_tifs = [file for file in all_result_tifs if file[-11:] == "_result.tif"]
+total_files_count = len(all_result_tifs)
 
+for current_file_count, (result_tif, map_tif) in enumerate(zip(all_result_tifs, all_map_tifs)):
+    mymat = tiff.imread(result_path + result_tif)
+    mymat = mymat / 255 # (convert grayscale value uint8 to probability matrix) but it might not be necessary
+    mymap = tiff.imread(result_path + map_tif)
+    print ("...creating binary mask of the result from probability matrix of result")
+    bin_mask_array = postprocess_masks(mymat, mymat.shape)
+    print ("...saving binary mask to polygon of each class")
+    mask_array_to_poly_json(bin_mask_array, result_path, os.path.split(result_tif)[1], reqd_class_label=['Trees', 'Crops', 'Water'])
+    print ("Written Polygons into json for {}".format(result_tif))
+    print ("Completed {} out of {}".format(current_file_count+1, total_files_count))
 
 # In[4]:
 

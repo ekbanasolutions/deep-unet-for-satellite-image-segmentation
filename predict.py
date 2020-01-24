@@ -12,7 +12,6 @@ from shapely.geometry.polygon import Polygon
 from PIL import Image, ImageDraw
 
 from train_unet import weights_path, get_model, normalize, PATCH_SZ, N_CLASSES 
-from map_to_json import postprocess_masks, mask_array_to_poly_json   
 from custom_utils import get_4bands
 
 def predict(x, model, patch_sz=160, n_classes=5):
@@ -94,12 +93,12 @@ if __name__ == '__main__':
     all_sliced_tifs = os.listdir('/home/ekbana/computer_vision/satellite-image/Planet.com/Planet_Data_Sliced/tif/all-sliced-tiff-850px/')
     result_path = "../Planet.com/Planet_Data_Sliced/tif/result/"
 
-    all_sliced_tifs = [file for file in all_sliced_tifs if file[-4:] == ".tif"]
+    all_sliced_tifs = [file for file in all_sliced_tifs if file[-4:] == ".tif"][0:3]
     total_files_count = len(all_sliced_tifs)
     for current_file_count, test_file in enumerate(all_sliced_tifs[0:]):
         test_filename = test_file
         print ("...running inference for {}".format(test_filename))
-        test_file = "../Planet.com/Planet_Data_Sliced/tif/" + test_file
+        test_file = "../../satellite-image/Planet.com/Planet_Data_Sliced/tif/all-sliced-tiff-850px/" + test_file
         class_id = 4
         # img = take_4bands(normalize(tiff.imread('data/mband/{}.tif'.format(test_id)).transpose([1,2,0])))   # make channels last
         # img = tiff.imread(test_file).transpose([1,2,0])
@@ -163,11 +162,4 @@ if __name__ == '__main__':
         tiff.imsave(result_path + test_filename + '_result.tif', (255*mymat).astype('uint8'))
         print ("...saving map for {}".format(test_filename))
         tiff.imsave(result_path + test_filename + '_map.tif', map)
-
-        # TODO: Do the following task in post-process
-        print ("...creating binary mask of the result from probability matrix") 
-        bin_mask_array = postprocess_masks(mymat, img)
-        print ("...saving binary mask to polygon of each class")
-        mask_array_to_poly_json(bin_mask_array, result_path, os.path.split(test_file)[1])
-        print ("Everything complete for {}".format(test_filename))
-        print ("Completed {} out of {}".format(current_file_count, total_files_count))
+        print ("Prediction Completed for file {} : {} out of {}".format(test_filename, current_file_count+1, total_files_count))
