@@ -1,3 +1,4 @@
+import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "0, 1" # second gpu
 
 from unet_model import *
